@@ -19,6 +19,30 @@ class _WalletPageState extends State<WalletPage>
   bool _showSavingsInBack = true;
   bool _showSavingsInFront = false;
   bool _isAnimating = false;
+  late final AnimationController _animationController;
+
+  late final Animation<Offset> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      duration: Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _animation = Tween<Offset>(begin: Offset(0, 0), end: Offset(1.0, 0.0))
+        .animate(
+          CurvedAnimation(parent: _animationController, curve: Curves.linear),
+        );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   void _toggleSavingsPosition() {
     if (_isAnimating) return;
@@ -56,81 +80,6 @@ class _WalletPageState extends State<WalletPage>
     }
   }
 
-  // Method to handle the transition
-  // void _toggleSavingsPosition()  {
-
-  //   if (!_isSavingsCardOutFront) {
-  //     // Moving to front
-  //     setState(() {
-  //       _showSavingsInFront = true;
-  //       _showSavingsInBack = true;
-  //     });
-
-  //     // Then after a tiny delay, start the animation
-  //     Future.delayed(Duration(seconds: 2), () {
-  //       if (mounted) {
-  //         setState(() {
-  //           _isSavingsCardOutFront = true;
-  //         });
-  //       }
-  //     });
-
-  //     // Then hide the back card after animation completes
-  //     Future.delayed(Duration(seconds: 2), () {
-  //       if (mounted) {
-  //         setState(() {
-  //           _showSavingsInBack = false;
-  //         });
-  //       }
-  //     });
-  //   } else {
-  //     // First show the back card (but invisible/offscreen)
-  //     setState(() {
-  //       _showSavingsInBack = true;
-  //     });
-
-  //     // Then start the reverse animation
-  //     Future.delayed(Duration(seconds: 2), () {
-  //       if (mounted) {
-  //         setState(() {
-  //           _isSavingsCardOutFront = false;
-  //         });
-  //       }
-  //     });
-
-  //     // Then hide the front card after animation completes
-  //     Future.delayed(Duration(seconds: 2), () {
-  //       if (mounted) {
-  //         setState(() {
-  //           _showSavingsInFront = false;
-  //         });
-  //       }
-  //     });
-  //     // Delay hiding the back card to allow smooth transition
-  //     Future.delayed(Duration(seconds: 2), () {
-  //       if (mounted) {
-  //         setState(() {
-  //           _isSavingsCardOutFront = true;
-  //         });
-  //       }
-  //     });
-  //   } else {
-  //     // Moving to back
-  //     setState(() {
-  //        _showSavingsInBack = false;
-  //     });
-
-  //     // Delay hiding the front card to allow smooth transition
-  //     Future.delayed(Duration(seconds: 2), () {
-  //       if (mounted) {
-  //         setState(() {
-  //           _showSavingsInFront = false;
-  //         });
-  //       }
-  //     });
-  // }
-  //  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -167,7 +116,7 @@ class _WalletPageState extends State<WalletPage>
     return Row(
       children: [
         CircleAvatar(
-          backgroundImage: AssetImage('assets/images/avatar.jpg',),
+          backgroundImage: AssetImage('assets/images/avatar.jpg'),
           radius: 40,
         ),
         SizedBox(width: 10),
@@ -211,11 +160,14 @@ class _WalletPageState extends State<WalletPage>
             // the behind card blue
             Positioned(
               top: 40,
-              child: Container(
-                width: 362,
-                height: 182,
-                decoration: BoxDecoration(
-                  color: Color.fromRGBO(33, 31, 132, 1),
+              child: SlideTransition(
+                position: _animation,
+                child: Container(
+                  width: 362,
+                  height: 182,
+                  decoration: BoxDecoration(
+                    color: Color.fromRGBO(33, 31, 132, 1),
+                  ),
                 ),
               ),
             ),
@@ -225,18 +177,22 @@ class _WalletPageState extends State<WalletPage>
               duration: Duration(seconds: 2),
               curve: Curves.easeIn,
               top: _isSavingsCardOutFront ? 40 : (_isBalanceHidden ? 68 : 0),
-              child: AnimatedOpacity(
-                opacity: _isBalanceHidden ? 0.9 : 1.0,
-                duration: Duration(seconds: 2),
-                child: AnimatedScale(
-                  scale: _isSavingsCardOutFront ? 0.95 : 1.0,
+              child: SlideTransition(
+                position: _animation,
+                child: AnimatedOpacity(
+                  opacity: _isBalanceHidden ? 0.9 : 1.0,
                   duration: Duration(seconds: 2),
-                  child: Cards(
-                    width: 254,
-                    height: 182,
-                    text: 'Credit Card',
-                    amount: '₦800,000.00',
-                    cardColor: Color.fromRGBO(155, 177, 70, 1),
+                  child: AnimatedScale(
+                    scale: _isSavingsCardOutFront ? 0.95 : 1.0,
+                    duration: Duration(seconds: 2),
+
+                    child: Cards(
+                      width: 254,
+                      height: 182,
+                      text: 'Credit Card',
+                      amount: '₦800,000.00',
+                      cardColor: Color.fromRGBO(155, 177, 70, 1),
+                    ),
                   ),
                 ),
               ),
@@ -272,108 +228,111 @@ class _WalletPageState extends State<WalletPage>
               duration: Duration(seconds: 2),
               curve: Curves.easeIn,
               top: _isSavingsCardOutFront ? 100 : 70,
-              child: ClipPath(
-                clipper: CurvedTopClipper(),
-                child: Container(
-                  width: 362,
-                  height: 182,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Color.fromRGBO(33, 31, 132, 1),
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/pattern.png'),
+              child: SlideTransition(
+                position: _animation,
+                child: ClipPath(
+                  clipper: CurvedTopClipper(),
+                  child: Container(
+                    width: 362,
+                    height: 182,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: Color.fromRGBO(33, 31, 132, 1),
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/pattern.png'),
 
-                      fit: BoxFit.scaleDown,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.4),
-                        blurRadius: 20,
-                        offset: Offset(0, 10),
+                        fit: BoxFit.scaleDown,
                       ),
-                    ],
-                  ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.4),
+                          blurRadius: 20,
+                          offset: Offset(0, 10),
+                        ),
+                      ],
+                    ),
 
-                  child: Stack(
-                    children: [
-                      Padding(
-                        padding: EdgeInsetsGeometry.all(24),
-                        child: Column(
-                          children: [
-                            SizedBox(height: 40),
-                            Text(
-                              "OMAH Wallet",
-                              style: GoogleFonts.dmSans(
-                                color: Colors.white,
-                                fontSize: 30,
-                                fontWeight: FontWeight.w500,
+                    child: Stack(
+                      children: [
+                        Padding(
+                          padding: EdgeInsetsGeometry.all(24),
+                          child: Column(
+                            children: [
+                              SizedBox(height: 40),
+                              Text(
+                                "Omah's Wallet",
+                                style: GoogleFonts.dmSans(
+                                  color: Colors.white,
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            Spacer(),
+                              Spacer(),
 
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _isBalanceHidden = !_isBalanceHidden;
-                                });
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 180),
-                                child: Container(
-                                  width: 130,
-                                  height: 30,
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    //vertical: 0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Color.fromRGBO(
-                                      0,
-                                      0,
-                                      0,
-                                      0.2,
-                                    ).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: Color.fromRGBO(
-                                        74,
-                                        72,
-                                        165,
-                                        1,
-                                      ).withOpacity(0.2),
-                                      width: 1,
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _isBalanceHidden = !_isBalanceHidden;
+                                  });
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 180),
+                                  child: Container(
+                                    width: 130,
+                                    height: 30,
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      //vertical: 0,
                                     ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        _isBalanceHidden
-                                            ? Icons.visibility
-                                            : Icons.visibility_off,
-                                        size: 16,
-                                        color: Colors.white,
+                                    decoration: BoxDecoration(
+                                      color: Color.fromRGBO(
+                                        0,
+                                        0,
+                                        0,
+                                        0.2,
+                                      ).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: Color.fromRGBO(
+                                          74,
+                                          72,
+                                          165,
+                                          1,
+                                        ).withOpacity(0.2),
+                                        width: 1,
                                       ),
-                                      SizedBox(width: 5),
-                                      Text(
-                                        _isBalanceHidden
-                                            ? 'Show Balance'
-                                            : 'Hide balance',
-                                        style: GoogleFonts.dmSans(
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          _isBalanceHidden
+                                              ? Icons.visibility
+                                              : Icons.visibility_off,
+                                          size: 16,
                                           color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w400,
                                         ),
-                                      ),
-                                    ],
+                                        SizedBox(width: 5),
+                                        Text(
+                                          _isBalanceHidden
+                                              ? 'Show Balance'
+                                              : 'Hide balance',
+                                          style: GoogleFonts.dmSans(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -433,13 +392,16 @@ class _WalletPageState extends State<WalletPage>
           Column(
             children: [
               GestureDetector(
-                onTap: () {
-                  if (_showSavingsInFront) {
+                onTap: () async {
+                  if (_animationController.isAnimating) return;
+
+                  await _animationController.forward();
+
+                  if (mounted) {
                     context.go('/addMoney');
-                  } else {
-                    context.go('/');
                   }
                 },
+
                 child: CircleAvatar(
                   radius: 40,
                   backgroundColor: Color.fromRGBO(245, 245, 245, 1),
