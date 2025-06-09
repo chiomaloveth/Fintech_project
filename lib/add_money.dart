@@ -17,7 +17,13 @@ class _AddMoneyState extends State<AddMoneyPage> with TickerProviderStateMixin {
   late AnimationController _enterAmountAnimationController;
   late AnimationController _amountAnimationController;
   late AnimationController _pleaseWaitController;
+  late AnimationController _beepingController;
+  late AnimationController _paperController;
+  late AnimationController _checkedController;
+  //late AnimationController _fadePleaseWaitController;
+
   bool _showAddMoney = false;
+  //bool _showPleaseWait = false;
 
   late final Animation<Offset> _cardAnimation;
   late final Animation<Offset> _atmAnimation;
@@ -29,6 +35,11 @@ class _AddMoneyState extends State<AddMoneyPage> with TickerProviderStateMixin {
   late final Animation<double> _enterAmountAnimation;
   late final Animation<double> _amountAnimation;
   late final Animation<double> _pleaseWaitAnimation;
+  late final Animation<double> _fadeEnterAmountAnimation;
+  late final Animation<double> _beepingAnimation;
+  late final Animation<double> _paperWidthAnimation;
+  late final Animation<double> _checkedAnimation;
+  late final Animation<double> _fadePleaseWaitAnimation;
 
   final _cardTweenBegin = Offset(-100, -700);
   final _end = Offset.zero;
@@ -36,7 +47,7 @@ class _AddMoneyState extends State<AddMoneyPage> with TickerProviderStateMixin {
   final _textTweenBegin = Offset(0, 200);
   final _addMoneybegin = Offset(0, 0);
   final _addMoneyEnd = Offset(-11, 0);
-  final _addMoneySecondSequenceEnd = Offset(-10.8, -12.6);
+  final _addMoneySecondSequenceEnd = Offset(-10, -12);
   final _enterSequenceEnd = Offset(-13.7, -13.9);
 
   @override
@@ -74,7 +85,21 @@ class _AddMoneyState extends State<AddMoneyPage> with TickerProviderStateMixin {
     );
 
     _pleaseWaitController = AnimationController(
+      duration: Duration(seconds: 1),
+      vsync: this,
+    );
+
+    _beepingController = AnimationController(
+      duration: Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    _paperController = AnimationController(
       duration: Duration(seconds: 2),
+      vsync: this,
+    );
+    _checkedController = AnimationController(
+      duration: Duration(milliseconds: 500),
       vsync: this,
     );
 
@@ -84,6 +109,11 @@ class _AddMoneyState extends State<AddMoneyPage> with TickerProviderStateMixin {
         curve: Curves.easeInOut,
       ),
     );
+
+    _beepingAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(_beepingController);
 
     _atmAnimation = Tween<Offset>(begin: _cardTweenBegin, end: _end).animate(
       CurvedAnimation(parent: _atmAnimationController, curve: Curves.easeInOut),
@@ -107,7 +137,7 @@ class _AddMoneyState extends State<AddMoneyPage> with TickerProviderStateMixin {
           begin: _addMoneybegin,
           end: _addMoneyEnd,
         ).chain(CurveTween(curve: Curves.linear)),
-        weight: 30,
+        weight: 40,
       ),
 
       // Phase 2: going up
@@ -120,39 +150,39 @@ class _AddMoneyState extends State<AddMoneyPage> with TickerProviderStateMixin {
       ),
 
       //Phase 3: staying up
-      TweenSequenceItem(
-        tween: ConstantTween(_addMoneySecondSequenceEnd),
-        weight: 0.4, // Hold the final position
-      ),
+      // TweenSequenceItem(
+      //   tween: ConstantTween(Offset(-11, -12.5)),
+      //   weight: 0.4, // Hold the final position
+      // ),
 
       //enetering the ATM
       TweenSequenceItem(
         tween: Tween(
-          begin: _addMoneySecondSequenceEnd,
+          begin: Offset(-10.2, -12),
           end: _enterSequenceEnd,
-        ).chain(CurveTween(curve: Curves.linear)),
-        weight: 30,
+        ).chain(CurveTween(curve: Curves.ease)),
+        weight: 50,
       ),
     ]).animate(_addMoneyAnimationController);
 
     // Width animation (last phase: grows back to 100)
     _addMoneyWidthAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: ConstantTween(100.0), weight: 30),
+      TweenSequenceItem(tween: ConstantTween(100.0), weight: 40),
       TweenSequenceItem(tween: Tween(begin: 100.0, end: 50.0), weight: 40),
       //TweenSequenceItem(tween: ConstantTween(50.0), weight: 0.4),
       //TweenSequenceItem(tween: Tween(begin: 50.0, end: 50.0), weight: 0.1),
       // ⬇️ Final phase: width increases to 100
-      TweenSequenceItem(tween: Tween(begin: 50.0, end: 100.0), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 50.0, end: 100.0), weight: 40),
     ]).animate(_addMoneyAnimationController);
 
     // Height animation (final phase: stays at 50)
     _addMoneyHeightAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: ConstantTween(200.0), weight: 30),
+      TweenSequenceItem(tween: ConstantTween(200.0), weight: 40),
       TweenSequenceItem(tween: Tween(begin: 200.0, end: 100.0), weight: 40),
       //TweenSequenceItem(tween: ConstantTween(100.0), weight: 0.4),
-      TweenSequenceItem(tween: Tween(begin: 100.0, end: 50.0), weight: 40),
+      TweenSequenceItem(tween: Tween(begin: 100.0, end: 60.0), weight: 40),
       // ⬇️ Final phase: height remains 50
-      TweenSequenceItem(tween: ConstantTween(30.0), weight: 40),
+      TweenSequenceItem(tween: ConstantTween(30.0), weight: 10),
     ]).animate(_addMoneyAnimationController);
 
     _enterAmountAnimation = Tween<double>(begin: 0, end: 1).animate(
@@ -165,17 +195,33 @@ class _AddMoneyState extends State<AddMoneyPage> with TickerProviderStateMixin {
     _amountAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _amountAnimationController, curve: Curves.easeIn),
     );
-  
-  _pleaseWaitAnimation = Tween<double>(begin: 0, end: 1).animate(
+
+    _pleaseWaitAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _pleaseWaitController, curve: Curves.easeIn),
+    );
+
+    _fadeEnterAmountAnimation = Tween<double>(begin: 1, end: 0).animate(
+      CurvedAnimation(parent: _pleaseWaitController, curve: Curves.easeIn),
+    );
+
+    _paperWidthAnimation = Tween<double>(begin: 0, end: 25).animate(
+      CurvedAnimation(
+        parent: _paperController,
+        curve: Cubic(0.25, 0.46, 0.45, 0.94),
+      ), // Custom bezier curve
+    );
+
+    _checkedAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _checkedController, curve: Curves.easeIn),
+    );
+
+    _fadePleaseWaitAnimation = Tween<double>(begin: 1, end: 0).animate(
+      CurvedAnimation(parent: _checkedController, curve: Curves.easeIn),
     );
     //Start animation after the first frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _cardAnimationController.forward();
     });
-    // Future.delayed(Duration(milliseconds: 1000), () {
-    //   _cardAnimationController.forward();
-    // });
 
     //Atm coming in after some seconds
     Future.delayed(Duration(milliseconds: 800), () {
@@ -207,6 +253,10 @@ class _AddMoneyState extends State<AddMoneyPage> with TickerProviderStateMixin {
     _addMoneyAnimationController.dispose();
     _enterAmountAnimationController.dispose();
     _amountAnimationController.dispose();
+    _pleaseWaitController.dispose();
+    _beepingController.dispose();
+    _paperController.dispose();
+    _checkedController.dispose();
     super.dispose();
   }
 
@@ -248,6 +298,26 @@ class _AddMoneyState extends State<AddMoneyPage> with TickerProviderStateMixin {
                     position: _atmAnimation,
                     child: Stack(
                       children: [
+                        Positioned(
+                          top: 30,
+                          left: 30,
+                          child: AnimatedBuilder(
+                            animation: _beepingAnimation,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: _beepingAnimation.value,
+                                child: Container(
+                                  width: 200,
+                                  height: 200,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Color.fromRGBO(116, 233, 66, 1),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                         Container(
                           width: 260,
                           height: 400,
@@ -256,52 +326,162 @@ class _AddMoneyState extends State<AddMoneyPage> with TickerProviderStateMixin {
                             fit: BoxFit.cover,
                           ),
                         ),
+                        Positioned(
+                          top: 30,
+                          left: 50,
+
+                          child: Container(
+                            width: 200,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              color: Color.fromRGBO(
+                                37,
+                                37,
+                                37,
+                                0.6,
+                              ).withOpacity(0),
+                            ),
+                            child: Row(
+                              children: [
+                                Column(
+                                  children: [
+                                    FadeTransition(
+                                      opacity: _pleaseWaitAnimation,
+                                      child: FadeTransition(
+                                        opacity: _fadePleaseWaitAnimation,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 50.0,
+                                            left: 20,
+                                          ),
+                                          child: Text(
+                                            'Please Wait....\n ₦10,000',
+                                            style: GoogleFonts.dmSans(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(width: 29),
+
+                                AnimatedBuilder(
+                                  animation: _paperWidthAnimation,
+                                  builder: (context, child) {
+                                    double scaleY =
+                                        _paperWidthAnimation.value / 25;
+                                    return Transform.scale(
+                                      scaleY: scaleY,
+                                      scaleX: 1.0, // Keep width constant
+                                      alignment: Alignment.topCenter,
+
+                                      // child: ClipRRect(
+                                      // alignment: Alignment.topCenter,
+                                      child: Container(
+                                        width: 20,
+                                        height: 25,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors: [
+                                              Color.fromRGBO(115, 115, 115, 1),
+                                              Color.fromRGBO(194, 194, 194, 1),
+                                              Color.fromRGBO(232, 232, 232, 1),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      //),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        Positioned(
+                          top: 75,
+                          left: 80,
+                          child: FadeTransition(
+                            opacity: _checkedAnimation,
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.white,
+                              child: Icon(
+                                Icons.check,
+                                size: 24,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ),
+                        ),
 
                         Positioned(
                           top: 30,
                           left: 60,
                           child: FadeTransition(
                             opacity: _enterAmountAnimation,
-                            child: Container(
-                              width: 88.23769176858262,
-                              height: 150,
-                              decoration: BoxDecoration(
-                                color: Color.fromRGBO(37, 37, 37, 0.6),
-                              ),
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 40.0),
-                                    child: Text(
-                                      'Enter Amount',
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white,
+                            child: FadeTransition(
+                              opacity: _fadeEnterAmountAnimation,
+                              child: Container(
+                                width: 88.23769176858262,
+                                height: 150,
+                                decoration: BoxDecoration(
+                                  color: Color.fromRGBO(37, 37, 37, 0.6),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 40.0),
+                                      child: Text(
+                                        'Enter Amount',
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
-                                  ),
-
-                                  SizedBox(height: 15),
-                                  FadeTransition(
-                                    opacity: _amountAnimation,
-                                    child: Text(
-                                      '₦10,000',
-                                      style: GoogleFonts.dmSans(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white,
+                                    //Padding(
+                                    //  padding: const EdgeInsets.only(top: 40.0),
+                                    FadeTransition(
+                                      opacity: _pleaseWaitAnimation,
+                                      child: Text(
+                                        'Please Wait....\n₦10,000 ',
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
-                                  ),
 
-                                  SizedBox(height: 2),
-                                  Container(
-                                    width: 61,
-                                    height: 1,
-                                    color: Colors.white,
-                                  ),
-                                ],
+                                    FadeTransition(
+                                      opacity: _amountAnimation,
+                                      child: Text(
+                                        '₦10,000',
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 2),
+                                    Container(
+                                      width: 61,
+                                      height: 1,
+                                      color: Colors.white,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -687,8 +867,7 @@ class _AddMoneyState extends State<AddMoneyPage> with TickerProviderStateMixin {
             SizedBox(height: 30),
             SlideTransition(
               position: _buttonAnimation,
-              //child: SlideTransition(
-              // position: _addMoneyAnimation,
+
               child: Container(
                 width: 361,
                 height: 43,
@@ -696,6 +875,23 @@ class _AddMoneyState extends State<AddMoneyPage> with TickerProviderStateMixin {
                 child: ElevatedButton(
                   onPressed: () {
                     _addMoneyAnimationController.forward();
+                    if (_showAddMoney == true) {
+                      setState(() {
+                        _pleaseWaitController.forward();
+                        _beepingController.repeat(reverse: true);
+                        Future.delayed(const Duration(seconds: 3), () {
+                          _beepingController.stop(); // Stop the animation
+
+                          _checkedController.forward();
+                          _paperController.forward();
+                          Future.delayed(Duration(seconds: 4), () {
+                            context.go('/successPage');
+                          });
+                        });
+
+                        //
+                      });
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromRGBO(88, 86, 214, 1),

@@ -11,8 +11,7 @@ class WalletPage extends StatefulWidget {
   State<WalletPage> createState() => _WalletPageState();
 }
 
-class _WalletPageState extends State<WalletPage>
-    with SingleTickerProviderStateMixin {
+class _WalletPageState extends State<WalletPage> with TickerProviderStateMixin {
   final int _currentIndex = 0;
   bool _isBalanceHidden = false;
   bool _isSavingsCardOutFront = false;
@@ -28,7 +27,7 @@ class _WalletPageState extends State<WalletPage>
     super.initState();
 
     _animationController = AnimationController(
-      duration: Duration(milliseconds: 300),
+      duration: Duration(milliseconds: 50),
       vsync: this,
     );
 
@@ -346,6 +345,7 @@ class _WalletPageState extends State<WalletPage>
                 top: _isSavingsCardOutFront
                     ? 10 // In front position
                     : 50,
+
                 child: AnimatedOpacity(
                   opacity: _isSavingsCardOutFront ? 1.0 : 0.0,
                   duration: Duration(seconds: 2),
@@ -377,6 +377,7 @@ class _WalletPageState extends State<WalletPage>
                     ),
                   ),
                 ),
+                // ),
               ),
           ],
         ),
